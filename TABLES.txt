@@ -1,0 +1,158 @@
+###################################################################
+
+## FLIGHTS TABLE ##
+
+sqlite> select * from flights where id < 2;
+1|148|70|2016-01-25 18:27:31|107.47|1A,1B,...,19F|78.51|17.75|1721
+
+sqlite> PRAGMA table_info(flights);
+0|id|INT|0||0
+1|src_id|INT|0||0
+2|dest_id|INT|0||0
+3|dt|DATETIME|0||0
+4|price|DECIMAL(10,2)|0||0
+5|avail_seats|VARCHAR(400)|0||0
+6|bag_price|DECIMAL(8,2)|0||0
+7|seat_price|DECIMAL(8,2)|0||0
+8|miles|INT|0||0
+
+###################################################################
+
+## AIRPORTS TABLE ##
+sqlite> select * from airports;
+1|Birmingham International Airport|BHM
+
+sqlite> PRAGMA table_info(airports);
+0|id|INT|0||0
+1|long_name|VARCHAR(30)|0||0
+2|short_name|VARCHAR(5)|0||0
+
+###################################################################
+
+## ACCOUNTS TABLE ##
+sqlite> select * from accounts;
+1|dee|fault|demail@gmail.com|default|default|0
+
+sqlite> PRAGMA table_info(accounts);
+0|id|INT|0||0
+1|fname|VARCHAR(10)|0||0
+2|lname|VARCHAR(15)|0||0
+3|email|VARCHAR(25)|0||0
+4|username|VARCHAR(20)|0||0
+5|password|VARCHAR(25)|0||0
+6|reward_miles|INT|0||0
+
+###################################################################
+
+## CARDS TABLE ##
+sqlite> select * from cards;
+1|0000123456789000|999|Visa|Pork T. Twerkins|08/2017
+
+sqlite> PRAGMA table_info(cards);
+0|id|INT|0||0
+1|num|VARCHAR(20)|0||0
+2|cvv|VARCHAR(3)|0||0
+3|company|VARCHAR(15)|0||0
+4|name_on_card|VARCHAR(30)|0||0
+5|expiration|VARCHAR(10)|0||0
+
+###################################################################
+
+## ACCOUNTS_CARDS FK TABLE
+
+sqlite> PRAGMA table_info(accounts_cards);
+0|id|INT|0||0
+1|account_id|INT|0||0
+2|card_id|INT|0||0
+
+
+sqlite> select * from accounts_cards;
+1|1|1
+
+###################################################################
+
+## ACCOUNTS_BOOKINGS FK TABLE ##
+
+sqlite> PRAGMA table_info(accounts_bookings);
+0|id|INTEGER|0||1
+1|account_id|INT|0||0
+2|booking_id|INT|0||0
+
+sqlite> select * from accounts_bookings;
+1|1|1
+
+###################################################################
+
+## BOOKINGS TABLE ##
+
+sqlite> PRAGMA table_info(bookings);
+0|id|INTEGER|0||1
+1|personal_info_id|INT|0||0
+2|seat_numbers|VARCHAR(30)|0||0
+3|bags|INT|0||0
+4|ancillary_pkg_id|INT|0||0
+
+sqlite> select * from bookings;
+1|1|1A,1B|2|1
+
+###################################################################
+
+## FLIGHTS_BOOKINGS FK TABLE ##
+
+sqlite> PRAGMA table_info(flights_bookings);
+0|id|INTEGER|0||1
+1|flight_id|INT|0||0
+2|booking_id|INT|0||0
+
+sqlite> select * from flights_bookings;
+1|1|1
+
+###################################################################
+
+## PERSONAL_INFO TABLE ##
+
+sqlite> PRAGMA table_info(personal_info);
+0|id|INTEGER|0||1
+1|fullname|VARCHAR(40)|0||0
+2|DOB|VARCHAR(10)|0||0
+3|gender|VARCHAR(8)|0||0
+4|address1|VARCHAR(20)|0||0
+5|address2|VARCHAR(20)|0||0
+6|city|VARCHAR(20)|0||0
+7|state|VARCHAR(20)|0||0
+8|zipcode|VARCHAR(12)|0||0
+9|phone|VARCHAR(15)|0||0
+10|email|VARCHAR(30)|0||0
+
+sqlite> select * from personal_info;
+1|Porky P Twerkins|05/15/1993|female|141 Piedmont Avenue|Apt. 2252|Atlanta|Georgia|30303|404-710-9222|porkyp@gmail.com
+
+
+
+
+
+
+
+## QUERY EXAMPLES
+
+# Gets account first name,  flight id , and seats booked.
+sqlite> select a.fname, f.id, b.seat_numbers from accounts_bookings as ab join accounts as a on ab.account_id == a.id join flights_bookings as fb on ab.booking_id == fb.booking_id join flights as f on f.id == fb.flight_id join bookings as b on b.id == ab.booking_id;
+guest|1|1A,1B
+
+# GETS ALL ACCOUNT AND BOOKING INFOMATION
+sqlite> select a.*, b.* from accounts_bookings join accounts as a on account_id == a.id join bookings as b on booking_id == b.id;
+1|guest|guest|guest@travlr.com|admin|admin|0|1|1|1A,1B|2|1
+
+# GETS PERSONAL INFORMATION OF ALL PASSENGERS ON SPECIFIED FLIGHT
+sqlite> select pi.* from flights as f join flights_bookings as fb on fb.flight_id == f.id join bookings as b on fb.booking_id == b.id join personal_info as pi on pi.id == b.personal_info_id;
+1|Porky P Twerkins|05/15/1993|female|141 Piedmont Avenue|Apt. 2252|Atlanta|Georgia|30303|404-710-9222|porkyp@gmail.com
+
+# Get Info for All Credit Cards Tied to Admin Account
+select c.* from accounts_cards as ac join accounts as a on a.id=ac.account_id join cards as c on ac.card_id=c.id where a.username='admin';
+
+# Get CreditCard Information Used For Booking with id 7
+select c.* from bookings_cards as bc join bookings as b on b.id=bc.booking_id join cards as c on bc.card_id=c.id where booking_id=7;
+
+
+
+
